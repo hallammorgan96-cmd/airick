@@ -1,0 +1,11 @@
+name = "airick"
+compatibility_date = "2024-03-11"
+
+[build]
+command = ""
+
+[site]
+bucket = "."
+
+[[pages_build_output_dir]]
+value = "."
