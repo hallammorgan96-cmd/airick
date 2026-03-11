@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Rick - FlowCode Golf Mental Coach</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #0d1f17;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a3d2b 0%, #0d1f17 100%);
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid #c9a84c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.1);
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #c9a84c;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            font-weight: 400;
+        }
+
+        .clear-btn {
+            background: none;
+            border: 2px solid #c9a84c;
+            color: #c9a84c;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .clear-btn:hover {
+            background: #c9a84c;
+            color: #0d1f17;
+        }
+
+        /* Mode Toggle */
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: #1a3d2b;
+            border-bottom: 1px solid #2a4d3b;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid #c9a84c;
+            color: #c9a84c;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            background: rgba(201, 168, 76, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: #c9a84c;
+            color: #0d1f17;
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3);
+        }
+
+        /* Quick Prompts */
+        .quick-prompts {
+            padding: 1rem 1.5rem;
+            background: #1a3d2b;
+            border-bottom: 1px solid #2a4d3b;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            scrollbar-color: #c9a84c #1a3d2b;
+        }
+
+        .quick-prompts::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .quick-prompts::-webkit-scrollbar-track {
+            background: #1a3d2b;
+        }
+
+        .quick-prompts::-webkit-scrollbar-thumb {
+            background: #c9a84c;
+            border-radius: 3px;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin-right: 0.75rem;
+            background: #0d1f17;
+            border: 2px solid #c9a84c;
+            color: #c9a84c;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .chip:hover {
+            background: #c9a84c;
+            color: #0d1f17;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3);
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: #c9a84c #1a3d2b;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: #1a3d2b;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #c9a84c;
+            border-radius: 4px;
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 1rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .avatar.rick {
+            background: #c9a84c;
+            color: #0d1f17;
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3);
+        }
+
+        .avatar.user {
+            background: #1a3d2b;
+            color: #c9a84c;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            position: relative;
+        }
+
+        .message.user .message-bubble {
+            text-align: right;
+        }
+
+        .message-content {
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .message.assistant .message-content {
+            background: #1a3d2b;
+            border-left: 3px solid #c9a84c;
+            box-shadow: 0 2px 8px rgba(201, 168, 76, 0.15);
+        }
+
+        .message.user .message-content {
+            background: #1a3d2b;
+            color: #ffffff;
+        }
+
+        .message-content strong {
+            color: #c9a84c;
+            font-weight: 600;
+        }
+
+        .error-text {
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #c9a84c;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            display: inline-block;
+            margin-top: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            background: transparent;
+            border: 1px solid #c9a84c;
+            color: #c9a84c;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #c9a84c;
+            color: #0d1f17;
+        }
+
+        /* Input Area */
+        .input-area {
+            background: #1a3d2b;
+            padding: 1.5rem;
+            border-top: 2px solid #c9a84c;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        #userInput {
+            width: 100%;
+            padding: 1rem;
+            background: #0d1f17;
+            border: 2px solid #2a4d3b;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+            transition: all 0.3s ease;
+        }
+
+        #userInput:focus {
+            outline: none;
+            border-color: #c9a84c;
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+        }
+
+        #userInput::placeholder {
+            color: #6a6a6a;
+        }
+
+        #sendBtn {
+            padding: 1rem 1.5rem;
+            background: #c9a84c;
+            border: none;
+            border-radius: 12px;
+            color: #0d1f17;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            height: 50px;
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sendBtn:hover:not(:disabled) {
+            background: #d4b760;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.75rem 1rem;
+            }
+
+            .header-title {
+                font-size: 1.4rem;
+            }
+
+            .mode-toggle {
+                padding: 0.75rem 1rem;
+            }
+
+            .quick-prompts {
+                padding: 0.75rem 1rem;
+            }
+
+            .chat-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .input-area {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-title">Ask Rick</div>
+            <div class="header-subtitle">FlowCode® Golf</div>
+        </div>
+        <button class="clear-btn" id="clearChatBtn">Clear Chat</button>
+    </div>
+
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="golfer">🏌️ Golfer</button>
+        <button class="mode-btn" data-mode="coach">🎓 Coach</button>
+    </div>
+
+    <!-- Quick Prompts -->
+    <div class="quick-prompts" id="quickPrompts"></div>
+
+    <!-- Chat Container -->
+    <div class="chat-container" id="chatContainer"></div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+        <div class="input-wrapper">
+            <textarea id="userInput" placeholder="What's on your mind?" rows="1"></textarea>
+        </div>
+        <button id="sendBtn" aria-label="Send">➤</button>
+    </div>
+
+    <script>
+        // System Prompt
+        const SYSTEM_PROMPT = `You are Rick Sessinghaus — PGA professional, mental performance coach, co-creator of FlowCode® Golf Academy, and mental coach to 2x Major Champion Collin Morikawa. You speak in first person as Rick — warm, direct, practical, like a coach on the range. Never preachy. Always end with something immediately actionable. Adapt your response precisely to what the person is actually asking — never give a generic answer.
+
+CORE FRAMEWORK:
+Level of Success Equation: Thoughts → Beliefs → Emotions → Attitude → State → Behaviour → Result
+
+FIVE LEVELS OF SKILL: 1. Unconscious Incompetence 2. Conscious Incompetence 3. Conscious Competence 4. Unconscious Competence 5. Unconscious Mastery / THE ZONE (no mechanical thoughts, body run by subconscious)
+
+TWO MINDSETS:
+FEAR MINDSET: driven by external validation, status, approval of others. Result-oriented. Bad score = personal failure. "I suck." Prone to embarrassment, excuses, overcontrol. Leads to performance breakdown.
+FLOW MINDSET: driven by love of the game, curiosity, personal challenge. Process-oriented. Game as challenge vs course. Detached from outcomes. Present-moment focused.
+
+5 FLOW TRIGGERS: 1. BREATH WORK — inhale 4, hold 2, exhale 8. Feel feet rooted. Centering below navel. 2. COGNITIVE QUESTIONS — "Where's the wind? What's my target? Best miss?" Facts not fears. 3. VISUALISATION — Dew Line, Shot tracer with colour, Basketball Hoop (enlarge hole), Focus Lens. Never visualise what you DON'T want. 4. PRACTICE SWING — mimic intended feel with intention. 5. AUDITORY/RHYTHM — "Smooth... fluid... 80%..." humming, tempo words.
+
+PRE-SHOT ROUTINE — 4 CHANNELS: 1. Environment (yardage, wind, lie) 2. Strategy (choose shot/target) 3. Visualisation (clear mental image) 4. Commitment (100% trust, zero mechanical thoughts)
+
+ANCHORING: Recall peak confidence → intensify → unique gesture (Rick: thumb+forefinger) → stack 10x → fire pre-shot.
+
+AROUSAL 1-10: Best at 5-6. Putting=4, Driver=7. Too high=choking. Too low=tanking.
+
+BOGEY TRAIN: Negative momentum. Stop it: 15 steps to release, caddy voice ("let's get it back"), mental replay done correctly, next shot = Shot 1.
+
+PERSONAL PAR: Realistic par per hole based on ability, not scorecard. Removes ego pressure.
+
+PARENTAL/EXTERNAL PRESSURE: Address using Fear Mindset framework. External pressure works through the Level of Success Equation — someone else's expectations become your Thoughts → affects Beliefs → creates anxious Emotions → disrupts State → hurts performance. The solution is separating identity from results and shifting to intrinsic motivation. Practical tools: 1) Clarify YOUR reasons for playing — write down what you love about golf separate from anyone else's opinion. 2) Process goals only during rounds — you control your routine, not the outcome or anyone's reaction. 3) Pre-shot routine creates a bubble of presence — inside the routine, only this shot exists.
+
+KEY DRILLS: Consecutive Putting (20 three-footers in a row, reset on miss), Horse Game (creative shots on range, shifts to trusting mode), Distraction Gauntlet (partner distracts while player executes routine), Ball Meditation (focus on ball 5 mins, train present-moment attention).
+
+COACHING SESSIONS: Mental Warm-Up (5-10min) → Skill Exercise (20min) → Pressure Drill (25min) → Debrief (5min)
+
+RESPONSE RULES:
+- Players in the moment (nerves, bad shot, focus): short, immediate, 3-5 steps, under 150 words
+- Deeper emotional questions (parental pressure, identity, motivation, self-worth): empathise first, explain the root cause using Fear Mindset framework, then give practical tools
+- Drill requests: Name | Goal | Steps | What to notice
+- Coach session plans: Goal | Warm-Up | Main Exercise | Pressure Drill | Debrief | Homework
+- Always first person: "Here's what I'd do..." / "In my experience..."
+- Address EXACTLY what was asked`;
+
+        // Quick Prompts
+        const PROMPTS = {
+            golfer: [
+                "First tee nerves",
+                "I just hit a terrible shot",
+                "Can't stop swing thoughts",
+                "I keep choking",
+                "Build my pre-shot routine",
+                "Give me a focus drill",
+                "Competition is tomorrow",
+                "I keep 3-putting"
+            ],
+            coach: [
+                "Session plan: junior with nerves",
+                "Design a 4-week programme",
+                "Pressure drill for groups",
+                "Player freezes over short putts",
+                "Introducing mental game to sceptics",
+                "Post-round reflection exercise",
+                "Competition prep protocol",
+                "Focus training drill"
+            ]
+        };
+
+        // State
+        let conversationHistory = [];
+        let currentMode = 'golfer';
+        let isProcessing = false;
+
+        // DOM Elements
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const clearChatBtn = document.getElementById('clearChatBtn');
+        const quickPrompts = document.getElementById('quickPrompts');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+
+        // Initialize
+        function init() {
+            renderQuickPrompts();
+            showWelcomeMessage();
+            
+            // Event Listeners
+            sendBtn.addEventListener('click', handleSend);
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+            userInput.addEventListener('input', autoResize);
+            
+            clearChatBtn.addEventListener('click', clearChat);
+            
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+            });
+        }
+
+        // Clear Chat
+        function clearChat() {
+            if (confirm('Clear all chat history?')) {
+                conversationHistory = [];
+                chatContainer.innerHTML = '';
+                showWelcomeMessage();
+            }
+        }
+
+        // Mode Switching
+        function switchMode(mode) {
+            currentMode = mode;
+            modeButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            renderQuickPrompts();
+        }
+
+        function renderQuickPrompts() {
+            quickPrompts.innerHTML = '';
+            PROMPTS[currentMode].forEach(prompt => {
+                const chip = document.createElement('span');
+                chip.className = 'chip';
+                chip.textContent = prompt;
+                chip.addEventListener('click', () => {
+                    userInput.value = prompt;
+                    handleSend();
+                });
+                quickPrompts.appendChild(chip);
+            });
+        }
+
+        // Welcome Message
+        function showWelcomeMessage() {
+            const welcomeMsg = "Hey, I'm Rick. Whether you're on the first tee with your heart pounding, dealing with pressure from parents or coaches, stuck in a putting slump, or a coach building a player's mental game — I'm here. What's going on?";
+            const bubble = createMessageBubble('assistant', welcomeMsg);
+            chatContainer.appendChild(bubble);
+        }
+
+        // Message Handling
+        function handleSend() {
+            if (isProcessing) return;
+            
+            const text = userInput.value.trim();
+            if (!text) return;
+            
+            // Add user message
+            const userBubble = createMessageBubble('user', text);
+            chatContainer.appendChild(userBubble);
+            userInput.value = '';
+            autoResize();
+            scrollToBottom();
+            
+            // Send to API
+            sendMessage(text);
+        }
+
+        function createMessageBubble(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${role}`;
+            avatar.textContent = role === 'assistant' ? 'RS' : 'YOU';
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = formatText(content);
+            
+            bubbleDiv.appendChild(contentDiv);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubbleDiv);
+            
+            return messageDiv;
+        }
+
+        function formatText(text) {
+            // Convert **bold** to <strong>
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Convert line breaks to <br>
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+
+        function showTyping(element) {
+            element.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+        }
+
+        function hideTyping(element) {
+            element.innerHTML = '';
+        }
+
+        function addCopyButton(bubble, text) {
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(text.replace(/\*\*/g, ''));
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            });
+            bubble.querySelector('.message-bubble').appendChild(copyBtn);
+        }
+
+        async function sendMessage(userText) {
+            // Add user message to history
+            conversationHistory.push({ role: 'user', content: userText });
+            
+            // Create Rick's empty message bubble
+            const rickBubble = createMessageBubble('assistant', '');
+            chatContainer.appendChild(rickBubble);
+            const contentEl = rickBubble.querySelector('.message-content');
+            
+            // Show typing indicator
+            showTyping(contentEl);
+            
+            isProcessing = true;
+            sendBtn.disabled = true;
+            
+            try {
+                // Call our Cloudflare Worker endpoint instead of OpenAI directly
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: 'system', content: SYSTEM_PROMPT },
+                            ...conversationHistory
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || `HTTP ${response.status}`);
+                }
+
+                // Clear typing indicator
+                hideTyping(contentEl);
+                contentEl.textContent = '';
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let fullText = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Split on newlines, keep last incomplete line in buffer
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() ?? '';
+                    
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed.startsWith('data: ')) continue;
+                        const payload = trimmed.slice(6).trim();
+                        if (payload === '[DONE]') continue;
+                        
+                        try {
+                            const json = JSON.parse(payload);
+                            const token = json.choices?.[0]?.delta?.content;
+                            if (token) {
+                                fullText += token;
+                                contentEl.innerHTML = formatText(fullText);
+                                scrollToBottom();
+                            }
+                        } catch (_) {
+                            // skip malformed JSON
+                        }
+                    }
+                }
+                
+                // Save full response to history
+                conversationHistory.push({ role: 'assistant', content: fullText });
+                
+                // Add copy button after response complete
+                addCopyButton(rickBubble, fullText);
+                
+            } catch (err) {
+                hideTyping(contentEl);
+                contentEl.innerHTML = `<span class="error-text">⚠️ ${err.message}. Please try again.</span>`;
+            } finally {
+                isProcessing = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function autoResize() {
+            userInput.style.height = 'auto';
+            userInput.style.height = Math.min(userInput.scrollHeight, 150) + 'px';
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
